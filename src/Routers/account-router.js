@@ -32,9 +32,9 @@ accountRouter
 
     const passwordError = AccountService.validatePassword(password);
 
-    // if (passwordError) {
-    //   return res.status(400).json({ error: passwordError });
-    // }
+    if (passwordError) {
+      return res.status(400).json({ error: passwordError });
+    }
     AccountService.hasUserWithUserName(req.app.get('db'), username)
       .then(hasUserWithUserName => {
         if (hasUserWithUserName)
