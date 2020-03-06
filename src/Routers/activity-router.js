@@ -4,30 +4,28 @@ const logger = require('../logger');
 const bodyParser = express.json();
 const ActivityService = require('../Services/ActivityService');
 
-activityRouter
-  .route('/')
-  .get((req, res, next) => {
-    const knexInstance = req.app.get('db');
-    ActivityService.getAllActivities(knexInstance)
-      .then(listings => {
-        res.json(listings);
-      })
-      .catch(next);
-  })
-  .delete((req, res, next) => {
-    const knexInstance = req.app.get('db');
-    const { id } = req.params;
-    ActivityService.deleteActivity(knexInstance, id)
-      .then(activity => {
-        if (activity === -1) {
-          logger.error(`Activity with id ${id} not found`);
-          return res.status(404).send('Activity not found');
-        }
-        logger.info(`Activity with id ${id} has been deleted`);
-        res.status(204).end();
-      })
-      .catch(next);
-  });
+activityRouter.route('/').get((req, res, next) => {
+  const knexInstance = req.app.get('db');
+  ActivityService.getAllActivities(knexInstance)
+    .then(listings => {
+      res.json(listings);
+    })
+    .catch(next);
+});
+activityRouter.route('/:id').delete((req, res, next) => {
+  const knexInstance = req.app.get('db');
+  const { id } = req.params;
+  ActivityService.deleteActivity(knexInstance, id)
+    .then(activity => {
+      if (activity === -1) {
+        logger.error(`Activity with id ${id} not found`);
+        return res.status(404).send('Activity not found');
+      }
+      logger.info(`Activity with id ${id} has been deleted`);
+      res.status(204).end();
+    })
+    .catch(next);
+});
 
 activityRouter.route('/').post(bodyParser, (req, res, next) => {
   const { Title, Date_Created, Creator, Description } = req.body;
