@@ -22,7 +22,10 @@ activityRouter.route('/:id').delete((req, res, next) => {
         return res.status(404).send('Activity not found');
       }
       logger.info(`Activity with id ${id} has been deleted`);
-      res.status(204).end();
+      res
+        .status(204)
+        .json(`Activity ${id} has been successfully deleted`)
+        .end();
     })
     .catch(next);
 });
