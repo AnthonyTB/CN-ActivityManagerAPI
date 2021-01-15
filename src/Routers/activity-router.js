@@ -3,6 +3,7 @@ const activityRouter = express.Router();
 const logger = require("../logger");
 const bodyParser = express.json();
 const ActivityService = require("../Services/ActivityService");
+const requireAuth = require("../Auth/JWT");
 
 activityRouter.route("/").get((req, res, next) => {
   const knexInstance = req.app.get("db");
@@ -12,7 +13,7 @@ activityRouter.route("/").get((req, res, next) => {
     })
     .catch(next);
 });
-activityRouter.route("/:id").delete((req, res, next) => {
+activityRouter.route("/:id").delete(requireAuth, (req, res, next) => {
   const knexInstance = req.app.get("db");
   const { id } = req.params;
 
@@ -40,7 +41,7 @@ activityRouter.route("/:id").delete((req, res, next) => {
     .catch(next);
 });
 
-activityRouter.route("/").post(bodyParser, (req, res, next) => {
+activityRouter.route("/").post(bodyParser, requireAuth, (req, res, next) => {
   const { Title, Date_Created, Creator, Description } = req.body;
 
   const userData = { Title, Date_Created, Creator, Description };

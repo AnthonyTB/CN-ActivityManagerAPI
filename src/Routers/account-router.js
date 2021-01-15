@@ -5,6 +5,7 @@ const AccountService = require("../Services/AccountService");
 const jwt = require("jsonwebtoken");
 const AuthService = require("../Auth/AuthService");
 const config = require("../config");
+const requireAuth = require("../Auth/JWT");
 
 const checkToken = (req, res, next) => {
   const header = req.headers["authorization"];
@@ -22,7 +23,7 @@ const checkToken = (req, res, next) => {
 
 accountRouter
   .route("/")
-  .post(bodyParser, (req, res, next) => {
+  .post(bodyParser, requireAuth, (req, res, next) => {
     const { name, password, username } = req.body;
     for (const field of ["name", "username", "password"])
       if (!req.body[field])
@@ -72,7 +73,7 @@ accountRouter
     });
   });
 
-accountRouter.route("/").delete((req, res, next) => {
+accountRouter.route("/").delete(requireAuth, (req, res, next) => {
   const knexInstance = req.app.get("db");
 
   AccountService.deleteUser(knexInstance, req.user.id)
