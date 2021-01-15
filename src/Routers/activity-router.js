@@ -1,25 +1,35 @@
-const express = require('express');
+const express = require("express");
 const activityRouter = express.Router();
-const logger = require('../logger');
+const logger = require("../logger");
 const bodyParser = express.json();
-const ActivityService = require('../Services/ActivityService');
+const ActivityService = require("../Services/ActivityService");
 
-activityRouter.route('/').get((req, res, next) => {
-  const knexInstance = req.app.get('db');
+activityRouter.route("/").get((req, res, next) => {
+  const knexInstance = req.app.get("db");
   ActivityService.getAllActivities(knexInstance)
-    .then(listings => {
+    .then((listings) => {
       res.json(listings);
     })
     .catch(next);
 });
-activityRouter.route('/:id').delete((req, res, next) => {
-  const knexInstance = req.app.get('db');
+activityRouter.route("/:id").delete((req, res, next) => {
+  const knexInstance = req.app.get("db");
   const { id } = req.params;
+
+  if ((req.user.id !== 1) | (req.user.id !== 3)) {
+    res
+      .status(401)
+      .json({
+        error: "Sorry, but your account isn't authorized to make this request",
+      })
+      .end();
+  }
+
   ActivityService.deleteActivity(knexInstance, id)
-    .then(activity => {
+    .then((activity) => {
       if (activity === -1) {
         logger.error(`Activity with id ${id} not found`);
-        return res.status(404).send('Activity not found');
+        return res.status(404).send("Activity not found");
       }
       logger.info(`Activity with id ${id} has been deleted`);
       res
@@ -30,37 +40,29 @@ activityRouter.route('/:id').delete((req, res, next) => {
     .catch(next);
 });
 
-activityRouter.route('/').post(bodyParser, (req, res, next) => {
+activityRouter.route("/").post(bodyParser, (req, res, next) => {
   const { Title, Date_Created, Creator, Description } = req.body;
 
-  if (!Title) {
-    logger.error('Title is required');
-    return res.status(400).send('Title required');
-  }
-  if (!Description) {
-    logger.error('Descriptione is required');
-    return res.status(400).send('Description required');
-  }
-  if (!Creator) {
-    logger.error('Creator is required');
-    return res.status(400).send('Creator required');
-  }
-  if (!Date_Created) {
-    logger.error('Date created is required');
-    return res.status(400).send('Date created required');
+  const userData = { Title, Date_Created, Creator, Description };
+
+  for (let i in userData) {
+    if (!i) {
+      logger.error(`${i} is required`);
+      return res.status(400).send(`${i} required`);
+    }
   }
 
   const activity = {
     title: Title,
     date_created: Date_Created,
     creator: Creator,
-    description: Description
+    description: Description,
   };
 
-  const knexInstance = req.app.get('db');
+  const knexInstance = req.app.get("db");
 
   ActivityService.insertActivity(knexInstance, activity)
-    .then(activity => {
+    .then((activity) => {
       const { id } = activity;
       logger.info(`Activity with id of ${id} was created`);
       res.status(201).json(ActivityService.serializeActivity(activity));
