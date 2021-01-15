@@ -42,9 +42,9 @@ activityRouter.route("/:id").delete(requireAuth, (req, res, next) => {
 });
 
 activityRouter.route("/").post(bodyParser, requireAuth, (req, res, next) => {
-  const { Title, Date_Created, Creator, Description } = req.body;
+  const { title, date_created, creator, description } = req.body;
 
-  for (const field of ["Title", "Date_Created", "Creator", "Description"]) {
+  for (const field of ["title", "date_created", "creator", "description"]) {
     if (!req.body[field])
       return res.status(400).json({
         error: `Missing '${field}' in request body`,
@@ -52,10 +52,10 @@ activityRouter.route("/").post(bodyParser, requireAuth, (req, res, next) => {
   }
 
   const activity = {
-    title: Title,
-    date_created: Date_Created,
-    creator: Creator,
-    description: Description,
+    title,
+    date_created,
+    creator,
+    description,
   };
 
   const knexInstance = req.app.get("db");
