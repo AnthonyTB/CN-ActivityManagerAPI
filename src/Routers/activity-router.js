@@ -44,13 +44,11 @@ activityRouter.route("/:id").delete(requireAuth, (req, res, next) => {
 activityRouter.route("/").post(bodyParser, requireAuth, (req, res, next) => {
   const { Title, Date_Created, Creator, Description } = req.body;
 
-  const userData = { Title, Date_Created, Creator, Description };
-
-  for (let i in userData) {
-    if (!i) {
-      logger.error(`${i} is required`);
-      return res.status(400).send(`${i} required`);
-    }
+  for (const field of ["Title", "Date_Created", "Creator", "Description"]) {
+    if (!req.body[field])
+      return res.status(400).json({
+        error: `Missing '${field}' in request body`,
+      });
   }
 
   const activity = {
