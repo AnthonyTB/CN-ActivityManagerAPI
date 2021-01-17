@@ -1,6 +1,5 @@
 const express = require("express");
 const activityRouter = express.Router();
-const logger = require("../logger");
 const bodyParser = express.json();
 const ActivityService = require("../Services/ActivityService");
 const requireAuth = require("../Auth/JWT");
