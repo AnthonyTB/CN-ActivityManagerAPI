@@ -1,9 +1,7 @@
-const express = require("express");
-const accountRouter = express.Router();
-const bodyParser = express.json();
-const AccountService = require("../Services/AccountService");
+const accountRouter = require("fastify");
+const accountService = require("../Services/AccountService");
 const jwt = require("jsonwebtoken");
-const AuthService = require("../Auth/AuthService");
+const authService = require("../Auth/AuthService");
 const config = require("../config");
 const requireAuth = require("../Auth/JWT");
 
@@ -23,7 +21,7 @@ const checkToken = (req, res, next) => {
 
 accountRouter
   .route("/")
-  .post(bodyParser, requireAuth, (req, res, next) => {
+  .post((req, res, next) => {
     const { name, password, username } = req.body;
     for (const field of ["name", "username", "password"])
       if (!req.body[field])
@@ -62,18 +60,17 @@ accountRouter
       if (err) {
         res.sendStatus(403);
       } else {
-        AuthService.getUserWithUserName(
-          req.app.get("db"),
-          authorizedData.sub
-        ).then((dbUser) => {
-          delete dbUser.password;
-          res.json({ dbUser });
-        });
+        authService
+          .getUserWithUserName(req.app.get("db"), authorizedData.sub)
+          .then((dbUser) => {
+            delete dbUser.password;
+            res.json({ dbUser });
+          });
       }
     });
   });
 
-accountRouter.route("/").delete(requireAuth, (req, res, next) => {
+accountRouter.route("/").delete((req, res, next) => {
   const knexInstance = req.app.get("db");
 
   AccountService.deleteUser(knexInstance, req.user.id)
